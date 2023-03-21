@@ -79,11 +79,15 @@ export default class extends Component {
     this.startAt = (await this._auction.startAt())*1n
     this.discountRate = await this._auction.discountRate()
 
-    this.checkPriceInterval = setInterval(() => {
+    this.checkPriceInterval = setInterval(async() => {
+        //this.nextBlock()
         const now = () => BigInt(Math.floor(Date.now()/1000))
         const elapsed = now() - this.startAt
+        let currentPrice = await this._auction.getPrice()
+        console.log(currentPrice)
         let discount = this.discountRate*elapsed
-        let newPrice = this.startingPrice - discount
+        let newPrice = currentPrice - discount
+        console.log(this.startingPrice)
         this.setState({
           currentPrice: ethers.formatEther(newPrice)
         })
@@ -155,8 +159,12 @@ export default class extends Component {
   // nextBlock = async() => {
   //   await this._auction.nextBlock()
   // }
+  nextBlock = async()=> {
+    await this._auction.nextBlock()
+  }
 
   buy = async() => {
+    nextBlock()
     //console.log((ethers.parseEther(this.state.currentPrice + 1)).toString())
     try {
       const tx = await this._auction.buy({
